@@ -10,6 +10,7 @@ void cmd_init();
 void RenderLogs();
 char *read_file(const char *path, long *out_size);
 char *calcula_sha1(const char *path);
+void cmd_add(const char *filename);
 
 int main(int argc, char *argv[]) {
 
@@ -21,13 +22,13 @@ int main(int argc, char *argv[]) {
     cmd_init();
   } else if (strcmp(argv[1], "log") == 0) {
     RenderLogs();
-  }
-  if (strcmp(argv[1], "add") == 0) {
+  } else if (strcmp(argv[1], "add") == 0) {
     if (argc < 3) {
       printf("ERRO: informe o arquivo\n");
-      return;
+      return 0;
     }
-    char *hash = calcula_sha1(argv[2]);
+    // char *hash = calcula_sha1(argv[2]);
+    cmd_add(argv[2]);
   }
   return 0;
 }
@@ -93,4 +94,31 @@ char *calcula_sha1(const char *path) {
   }
   result_hash[40] = '\0';
   return result_hash;
+}
+void cmd_add(const char *path) {
+  char *hash = calcula_sha1(path);
+  if (hash == NULL) {
+    printf("Erro ao ler o arquivo '%s'. \n", path);
+    return;
+  }
+  long tamanho;
+  char object_path[128];
+  snprintf(object_path, sizeof(object_path), ".shit/objects/%s", hash);
+  char *buffer = read_file(path, &tamanho);
+  if (buffer == NULL) {
+    printf("Erro: adicione um arquivo valido");
+    free(hash);
+    return;
+  }
+  FILE *dest_file = fopen(object_path, "wb");
+  if (dest_file == NULL) {
+    printf("Erro");
+    free(hash);
+    free(buffer);
+    return;
+  }
+  fwrite(buffer, 1, tamanho, dest_file);
+  fclose(dest_file);
+  free(hash);
+  free(buffer);
 }
