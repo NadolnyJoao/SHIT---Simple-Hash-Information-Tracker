@@ -1,0 +1,34 @@
+# Binários e Executáveis (Linux e Windows)
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+*.bin
+build/
+bin/
+dist/
+
+# Arquivos de Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs e Editores (VS Code, JetBrains, etc.)
+.vscode/
+.idea/
+*.suo
+*.user
+*.swp
+*.swo
+
+# Dependências e Logs
+node_modules/
+vendor/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignorar especificamente o binário 'main'
+/main
