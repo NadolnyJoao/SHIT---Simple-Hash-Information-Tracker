@@ -58,7 +58,7 @@ void cmd_init() {
   }
   MAKE_DIR(".shit");
   MAKE_DIR(".shit/objects");
-  MAKE_DIR(".shit/index");
+  // MAKE_DIR(".shit/index");
   MAKE_DIR(".shit/commits");
 
   // HEAD e criado vazio; sera preenchido a medida que os commits forem feitos.
