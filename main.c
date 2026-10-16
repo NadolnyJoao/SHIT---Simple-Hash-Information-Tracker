@@ -156,7 +156,8 @@ void cmd_add(const char *path) {
     printf("ERRO!");
     return;
   }
-  fprintf(staging, "%s %s\n", path, hash);
+  // Separador '\t' (tab) para permitir nomes de arquivo com espacos.
+  fprintf(staging, "%s\t%s\n", path, hash);
   fclose(staging);
   free(hash);
   free(buffer);
