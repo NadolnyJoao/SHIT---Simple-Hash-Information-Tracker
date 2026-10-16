@@ -9,6 +9,7 @@
 void cmd_init();
 void RenderLogs();
 char *read_file(const char *path, long *out_size);
+char *calcula_sha1(const char *path);
 
 int main(int argc, char *argv[]) {
 
@@ -52,4 +53,20 @@ char *read_file(const char *path, long *out_size) {
     *out_size = size;
   }
   return buffer;
+}
+char *calcula_sha1(const char *path) {
+  long size;
+  char *buffer = read_file(path, &size);
+  if (buffer == NULL) {
+    return NULL;
+  }
+  SHA1_CTX contexto;
+  unsigned char digest[20];
+  SHA1Init(&contexto);
+  SHA1Update(&contexto, (unsigned char *)buffer, size);
+  SHA1Final(digest, &contexto);
+  free(buffer);
+  char *result_hash = malloc(41);
+  if (result_hash == NULL)
+    return NULL;
 }
