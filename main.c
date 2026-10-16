@@ -1,3 +1,4 @@
+#include "sha1.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +8,7 @@
 
 void cmd_init();
 void RenderLogs();
+char *read_file(const char *path, long *out_size);
 
 int main(int argc, char *argv[]) {
 
@@ -30,4 +32,24 @@ void cmd_init() {
 
 void RenderLogs() {
   printf("mensagem hash \nAuthor: me\nData: 16-10-2026\n\n   Name mensagem ");
+}
+
+char *read_file(const char *path, long *out_size) {
+  FILE *file = fopen(path, "rb");
+  if (file == NULL)
+    return NULL;
+  fseek(file, 0, SEEK_END);
+  long size = ftell(file);
+  rewind(file);
+  char *buffer = (char *)malloc(size);
+  if (buffer == NULL) {
+    fclose(file);
+    return NULL;
+  }
+  fread(buffer, 1, size, file);
+  fclose(file);
+  if (out_size != NULL) {
+    *out_size = size;
+  }
+  return buffer;
 }
