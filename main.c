@@ -17,7 +17,9 @@ int main(int argc, char *argv[]) {
     printf("SHIT - A good version of Git");
     return 0;
   }
-  if (strcmp(argv[1], "log") == 0) {
+  if (strcmp(argv[1], "init") == 0) {
+    cmd_init();
+  } else if (strcmp(argv[1], "log") == 0) {
     RenderLogs();
   }
   return 0;
@@ -26,13 +28,18 @@ int main(int argc, char *argv[]) {
 void cmd_init() {
   struct stat st;
   if (stat(".shit", &st) == 0) {
-    printf("Repositorio SHIT ja existente. \n");
+    printf("Repositorio SHIT ja existente.\n");
     return;
   }
   mkdir(".shit", 0777);
   mkdir(".shit/objects", 0777);
+
   FILE *head = fopen(FILE_HEAD, "w");
-  fclose(head);
+  if (head != NULL) {
+    fclose(head);
+  }
+
+  printf("Repositorio SHIT inicializado com sucesso.\n");
 }
 
 void RenderLogs() {
