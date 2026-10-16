@@ -22,6 +22,13 @@ int main(int argc, char *argv[]) {
   } else if (strcmp(argv[1], "log") == 0) {
     RenderLogs();
   }
+  if (strcmp(argv[1], "add") == 0) {
+    if (argc < 3) {
+      printf("ERRO: informe o arquivo\n");
+      return;
+    }
+    char *hash = calcula_sha1(argv[2]);
+  }
   return 0;
 }
 
