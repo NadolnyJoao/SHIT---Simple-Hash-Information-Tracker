@@ -49,6 +49,7 @@ void cmd_init() {
   }
   MAKE_DIR(".shit");
   MAKE_DIR(".shit/objects");
+  MAKE_DIR(".shit/commits"); // Pasta para guardar os objetos de commit
 
   FILE *head = fopen(FILE_HEAD, "w");
   if (head != NULL) {
