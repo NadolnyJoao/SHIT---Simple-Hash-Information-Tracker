@@ -22,13 +22,23 @@ Cada commit registra seu commit pai, sua mensagem e os arquivos incluídos.
 
 ## Compilação
 
-Requer GCC ou outro compilador C compatível.
+Requer CMake 3.16+ e um compilador C (GCC, Clang ou MSVC).
+
+```bash
+cmake -B build
+cmake --build build
+```
+
+Execute o binário gerado:
+
+- Linux/macOS: `./build/shit`
+- Windows: `build\shit.exe` (Ninja) ou `build\Debug\shit.exe` (Visual Studio)
+
+Compilação rápida sem CMake (Linux/macOS):
 
 ```bash
 gcc *.c -o shit
 ```
-
-Execute o programa gerado pelo terminal.
 
 ## Filosofia
 
