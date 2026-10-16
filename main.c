@@ -69,4 +69,10 @@ char *calcula_sha1(const char *path) {
   char *result_hash = malloc(41);
   if (result_hash == NULL)
     return NULL;
+  int i;
+  for (i = 0; i < 20; i++) {
+    sprintf(&result_hash[i * 2], "%02x", digest[i]);
+  }
+  result_hash[40] = '\0';
+  return result_hash;
 }
