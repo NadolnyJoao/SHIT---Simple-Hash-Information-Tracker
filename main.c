@@ -13,12 +13,8 @@ char *calcula_sha1(const char *path);
 
 int main(int argc, char *argv[]) {
 
-  char *hash = calcula_sha1("test_input.txt");
-  if (hash != NULL) {
-    printf("%s\n", hash);
-    free(hash);
-  }
   if (argc < 2) {
+    printf("SHIT - A good version of Git");
     return 0;
   }
   if (strcmp(argv[1], "log") == 0) {

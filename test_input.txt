@@ -1,3 +1,0 @@
-Este e um arquivo de teste para validacao do SHA-1.
-Linha 2: abcdefghijklmnopqrstuvwxyz
-Linha 3: 0123456789
