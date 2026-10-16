@@ -47,6 +47,43 @@ void CreateCommit(char *flags[], int num_flags)
     nCommit.menssage[sizeof(nCommit.menssage) - 1] = '\0';
 
     // fazer a configuração dos arquivos
+    //setando variaveiz sacanas
+    nCommit.files = NULL;
+    nCommit.num_files = 0;
+    FILE *fileIndex = fopen(".shit/index", "r");
+    // ler cada linha
+    char linha[100];
+    while (fgets(linha, sizeof(linha), fileIndex))
+    {
+        linha[strcspn(linha, "\r\n")] = 0;
+        const char delimitador[] = "\t";
+        FileSave nfile;
+        // Primeira chamada: passa a string original
+        char *token = strtok(linha, delimitador);
+
+        strncpy(nfile.pathFile, token, sizeof(nfile.pathFile) - 1);
+        nfile.pathFile[sizeof(nfile.pathFile) - 1] = '\0';
+        token = strtok(NULL, delimitador);
+        strncpy(nfile.hashVersion, token, sizeof(nfile.hashVersion) - 1);
+        nfile.hashVersion[sizeof(nfile.hashVersion) - 1] = '\0';
+
+        // printf("filesave\nname: %s\nhash: %s\n\n", nfile.pathFile,nfile.hashVersion);
+
+        // adicionar essa porra na estrutura do commit FileSave* files;
+        int nNum_files = nCommit.num_files + 1;
+        FileSave* temp = realloc(nCommit.files, nNum_files * sizeof(FileSave));
+        if(temp == NULL){
+            printf("Erro para alocar memoria ");
+            fclose(fileIndex);
+            return;
+        }
+        nCommit.files = temp;
+        nCommit.files[nCommit.num_files] = nfile;
+        nCommit.num_files = nNum_files;
+    }
+    fclose(fileIndex);
+    // printf("ola mundo");
+
 
     // gerar id_hash
     SHA1_CTX contexto;
@@ -68,9 +105,7 @@ void CreateCommit(char *flags[], int num_flags)
     id_hash[40] = '\0';
 
     // geristrar isso no head
-    
+
     // finalização
-    printf("commit gerado com sucesso\nid:%s\ndata: %s\n        %s", id_hash, nCommit.date, nCommit.menssage);
-
-
+    printf("commit gerado com sucesso\nid:%s\nnumero de files:%d\ndata: %s\n        %s", id_hash,nCommit.num_files, nCommit.date, nCommit.menssage);
 }
