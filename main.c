@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-void RenderLogs(){
-  printf("mensagem hash \nAuthor: me\nData: 16-10-2026\n\n   Name mensagem ");
-}
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <time.h>
 
 
 int main(int  argc, char * argv[]) {
@@ -15,4 +15,8 @@ int main(int  argc, char * argv[]) {
     RenderLogs();
   }
   return 0;
+}
+void cmd_init() { mkdir(".shit", 0777); }
+void RenderLogs(){
+  printf("mensagem hash \nAuthor: me\nData: 16-10-2026\n\n   Name mensagem ");
 }
