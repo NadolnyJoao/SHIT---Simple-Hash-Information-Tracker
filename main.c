@@ -1,6 +1,7 @@
 #include "sha1.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "commit.h"
 #include <string.h>
 #include <sys/stat.h>
 
@@ -35,6 +36,10 @@ int main(int argc, char *argv[])
   {
     RenderLogs();
   }
+  else if (strcmp(argv[1], "commit") == 0)
+  {
+    CreateCommit(argv,argc);
+  }
   return 0;
 }
 
@@ -48,6 +53,8 @@ void cmd_init()
   }
   MAKE_DIR(".shit");
   MAKE_DIR(".shit/objects");
+  MAKE_DIR(".shit/index");
+  MAKE_DIR(".shit/commits");
 
   FILE *head = fopen(FILE_HEAD, "w");
   if (head != NULL)
