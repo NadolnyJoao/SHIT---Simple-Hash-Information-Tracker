@@ -32,3 +32,6 @@ yarn-error.log*
 
 # Ignorar especificamente o binário 'main'
 /main
+
+#ignorar configs do nvim
+*.json
