@@ -35,7 +35,7 @@ typedef struct
 
 } Commit;
 
-void CreateCommit(char* flags[], int num_flags);
-
+Commit *CreateCommit(char* flags[], int num_flags);
+void RegisterCommitFile(const Commit *c);
 
 #endif
