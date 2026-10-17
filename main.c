@@ -26,7 +26,11 @@ void cmd_add(const char *filename);
 int main(int argc, char *argv[]) {
 
   if (argc < 2) {
-    printf("SHIT - A good version of Git");
+    printf("SHIT - Simple Hash Information Tracker\n\n");
+    printf("Uso:\n");
+    printf("  shit init             Inicializa um repositorio\n");
+    printf("  shit add <arquivo>    Adiciona um arquivo a area de preparacao\n");
+    printf("  shit log              Exibe o historico de commits\n");
     return 0;
   }
   if (strcmp(argv[1], "init") == 0) {
@@ -35,13 +39,16 @@ int main(int argc, char *argv[]) {
     RenderLogs();
   } else if (strcmp(argv[1], "add") == 0) {
     if (argc < 3) {
-      printf("ERRO: informe o arquivo\n");
-      return 0;
+      fprintf(stderr, "shit: erro: nenhum arquivo informado.\n");
+      fprintf(stderr, "uso: shit add <arquivo>\n");
+      return 1;
     }
-    // char *hash = calcula_sha1(argv[2]);
     cmd_add(argv[2]);
+  } else {
+    fprintf(stderr, "shit: erro: comando desconhecido '%s'.\n", argv[1]);
+    fprintf(stderr, "uso: shit init | shit add <arquivo> | shit log\n");
+    return 1;
   }
-  // Comando desconhecido nao e tratado: o programa apenas encerra sem aviso.
   return 0;
 }
 
@@ -49,7 +56,7 @@ void cmd_init() {
   // stat() verifica se ".shit" ja existe, evitando reinicializar o repositorio.
   struct stat st;
   if (stat(".shit", &st) == 0) {
-    printf("Repositorio SHIT ja existente.\n");
+    printf("Repositorio SHIT ja inicializado em '.shit/'.\n");
     return;
   }
   MAKE_DIR(".shit");
@@ -58,11 +65,13 @@ void cmd_init() {
 
   // HEAD e criado vazio; sera preenchido a medida que os commits forem feitos.
   FILE *head = fopen(FILE_HEAD, "w");
-  if (head != NULL) {
+  if (head == NULL) {
+    fprintf(stderr, "shit: aviso: nao foi possivel criar '%s'.\n", FILE_HEAD);
+  } else {
     fclose(head);
   }
 
-  printf("Repositorio SHIT inicializado com sucesso.\n");
+  printf("Repositorio SHIT inicializado em '.shit/'.\n");
 }
 
 // Placeholder: ainda imprime dados fixos, sem ler os commits reais.
@@ -124,7 +133,7 @@ char *calcula_sha1(const char *path) {
 void cmd_add(const char *path) {
   char *hash = calcula_sha1(path);
   if (hash == NULL) {
-    printf("Erro ao ler o arquivo '%s'. \n", path);
+    fprintf(stderr, "shit: erro: nao foi possivel abrir ou ler '%s'.\n", path);
     return;
   }
   long tamanho;
@@ -134,14 +143,14 @@ void cmd_add(const char *path) {
   snprintf(object_path, sizeof(object_path), ".shit/objects/%s", hash);
   char *buffer = read_file(path, &tamanho);
   if (buffer == NULL) {
-    printf("Erro: adicione um arquivo valido");
+    fprintf(stderr, "shit: erro: falha ao ler o conteudo de '%s'.\n", path);
     free(hash);
     return;
   }
   // Grava o conteudo do arquivo dentro do objeto.
   FILE *dest_file = fopen(object_path, "wb");
   if (dest_file == NULL) {
-    printf("Erro");
+    fprintf(stderr, "shit: erro: nao foi possivel gravar o objeto '%s'.\n", object_path);
     free(hash);
     free(buffer);
     return;
@@ -151,14 +160,15 @@ void cmd_add(const char *path) {
   // Modo "a" (append): adiciona a linha ao index sem apagar o que ja existe.
   FILE *staging = fopen(".shit/index", "a");
   if (staging == NULL) {
+    fprintf(stderr, "shit: erro: nao foi possivel abrir o indice '.shit/index'.\n");
     free(hash);
     free(buffer);
-    printf("ERRO!");
     return;
   }
   // Separador '\t' (tab) para permitir nomes de arquivo com espacos.
   fprintf(staging, "%s\t%s\n", path, hash);
   fclose(staging);
+  printf("adicionado: %s (%s)\n", path, hash);
   free(hash);
   free(buffer);
 }
