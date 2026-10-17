@@ -40,6 +40,18 @@ Compilação rápida sem CMake (Linux/macOS):
 gcc *.c -o shit
 ```
 
+## Testes
+
+A suíte de testes de linha de comando fica em [`tests/`](tests/) e verifica o
+comportamento do CLI, além de comparar os hashes gerados com o `sha1sum`.
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+Consulte [`tests/README.md`](tests/README.md) para detalhes sobre cobertura e
+como executar os testes diretamente.
+
 ## Filosofia
 
 O SHIT prioriza simplicidade, portabilidade e clareza. Sua arquitetura baseada em snapshots e sua implementação em C oferecem uma introdução prática aos conceitos de controle de versão, sem depender de ferramentas externas de comparação de arquivos.
