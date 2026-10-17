@@ -42,15 +42,29 @@ gcc *.c -o shit
 
 ## Testes
 
-A suíte de testes de linha de comando fica em [`tests/`](tests/) e verifica o
-comportamento do CLI, além de comparar os hashes gerados com o `sha1sum`.
+A suíte de testes de linha de comando fica em [`tests/`](tests/). Ela executa o
+binário em um diretório temporário e verifica o comportamento observável:
+
+- criação da estrutura pelo `init`;
+- integridade dos objetos e do índice gerados pelo `add` (compara os hashes
+  com o `sha1sum`);
+- casos de borda (nomes com espaços, arquivo vazio, binário e arquivo grande);
+- tratamento de erros e códigos de saída.
+
+Via CTest (recomendado):
 
 ```bash
 ctest --test-dir build --output-on-failure
 ```
 
-Consulte [`tests/README.md`](tests/README.md) para detalhes sobre cobertura e
-como executar os testes diretamente.
+Diretamente pelo script:
+
+```bash
+./tests/test_cli.sh
+```
+
+Consulte [`tests/README.md`](tests/README.md) para a cobertura completa e para
+informar um binário específico.
 
 ## Filosofia
 
