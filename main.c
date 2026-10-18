@@ -1,6 +1,7 @@
 #include "sha1.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "commit.h"
 #include <string.h>
 #include <sys/stat.h>
 
@@ -44,6 +45,9 @@ int main(int argc, char *argv[]) {
       return 1;
     }
     cmd_add(argv[2]);
+  }else if (strcmp(argv[1], "commit") == 0)
+  {
+    CreateCommit(argv,argc);
   } else {
     fprintf(stderr, "shit: erro: comando desconhecido '%s'.\n", argv[1]);
     fprintf(stderr, "uso: shit init | shit add <arquivo> | shit log\n");
@@ -60,11 +64,14 @@ void cmd_init() {
     return;
   }
   MAKE_DIR(".shit");
-  MAKE_DIR(".shit/objects"); // Onde os arquivos sao guardados (nomeado pelo hash)
-  MAKE_DIR(".shit/commits"); // Pasta para guardar os objetos de commit
+  MAKE_DIR(".shit/objects");
+  // MAKE_DIR(".shit/index");
+  MAKE_DIR(".shit/commits");
 
   // HEAD e criado vazio; sera preenchido a medida que os commits forem feitos.
   FILE *head = fopen(FILE_HEAD, "w");
+  if (head != NULL) {
+    fprintf(head,"break");// coloquei esse dado porq precisa de um previus quando inicia commit 
   if (head == NULL) {
     fprintf(stderr, "shit: aviso: nao foi possivel criar '%s'.\n", FILE_HEAD);
   } else {
