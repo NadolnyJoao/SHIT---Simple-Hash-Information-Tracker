@@ -25,13 +25,15 @@ int FileOfIndex(FileSave **files, int *num_files)
         FileSave nfile;
         // Primeira chamada: passa a string original
         char *token = strtok(linha, delimitador);
-        if(token == NULL) continue;
-        
+        if (token == NULL)
+            continue;
+
         strncpy(nfile.pathFile, token, sizeof(nfile.pathFile) - 1);
         nfile.pathFile[sizeof(nfile.pathFile) - 1] = '\0';
-        
+
         token = strtok(NULL, delimitador);
-        if(token == NULL) continue;
+        if (token == NULL)
+            continue;
 
         strncpy(nfile.hashVersion, token, sizeof(nfile.hashVersion) - 1);
         nfile.hashVersion[sizeof(nfile.hashVersion) - 1] = '\0';
@@ -87,7 +89,7 @@ Commit *CreateCommit(char *flags[], int num_flags)
 {
     // ler arquivos que estão na pasta index
     // criar uma função que faz isso
-    Commit *nCommit = calloc(1,sizeof(Commit));
+    Commit *nCommit = calloc(1, sizeof(Commit));
     if (nCommit == NULL)
     {
         printf("Erro ao alocar Commit\n");
@@ -158,15 +160,36 @@ Commit *CreateCommit(char *flags[], int num_flags)
         free(nCommit);
         return NULL;
     }
-    
+    // pegar a primeira linha
+    strncpy(nCommit->previous, " ", sizeof(nCommit->previous) - 1);
+    nCommit->previous[sizeof(nCommit->previous) - 1] = "\0";
+    char id_hash_previus[42];
+    if (fgets(id_hash_previus, sizeof(id_hash_previus), head) == NULL)
+    {
+        printf("Erro ao buscar ultimo commit no head ou não tem ");
+        fclose(head);
+        free(nCommit);
+        return NULL;
+    }
     fclose(head);
-
-    
+    strncpy(nCommit->previous, id_hash_previus, sizeof(nCommit->previous) - 1);
+    nCommit->previous[sizeof(nCommit->previous) - 1] = '\0';
+    // printf("ultimo commit : %s\n",id_hash_previus);
 
     // geristrar isso no head
+    head = fopen(".shit/HEAD", "w");
+    if (head == NULL)
+    {
+        printf("Erro ao abrir head apra registra o commir novo ");
+        fclose(head);
+        free(nCommit);
+        return NULL;
+    }
+    fprintf(head, nCommit->id_hash);
+    fclose(head);
 
     // finalização
-    printf("commit gerado com sucesso\nid:%s\nnumero de files:%d\ndata: %s\n        %s\n\n", nCommit->id_hash, nCommit->num_files, nCommit->date, nCommit->menssage);
+    printf("commit gerado com sucesso\nid:%s\nultimo commit: %s\nnumero de files:%d\ndata: %s\n        %s\n\n", nCommit->id_hash, nCommit->previous, nCommit->num_files, nCommit->date, nCommit->menssage);
     // registrar em arquivo  o commit
     RegisterCommitFile(nCommit);
     return nCommit;

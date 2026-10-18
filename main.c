@@ -64,6 +64,7 @@ void cmd_init() {
   // HEAD e criado vazio; sera preenchido a medida que os commits forem feitos.
   FILE *head = fopen(FILE_HEAD, "w");
   if (head != NULL) {
+    fprintf(head,"break");// coloquei esse dado porq precisa de um previus quando inicia commit 
     fclose(head);
   }
 
