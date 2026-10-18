@@ -37,7 +37,7 @@ Execute o binário gerado:
 Compilação rápida sem CMake (Linux/macOS):
 
 ```bash
-gcc *.c -o shit
+gcc -std=c11 -Wall -Wextra -I. *.c -o shit
 ```
 
 ## Filosofia
