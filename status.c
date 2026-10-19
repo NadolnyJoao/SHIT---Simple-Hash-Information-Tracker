@@ -81,7 +81,6 @@ void Status()
 
     printf("o ultimo commit possui %d arquivos projeto atual possui %d\n", c->num_files, numFilesDIR);
 
-    
     // logica de compração
     /*grid copração
     0 arquivos com nome diferente
@@ -91,17 +90,17 @@ void Status()
     lilnha vazia            = novo arquivo
     linha com somatoria 1   = arquivo modificado
     linha com somatoria 2   = arquivos iguais
-    coluna vazia            = arquivo removido 
+    coluna vazia            = arquivo removido
     */
     int matrixCoparation[255][255] = {0};
-    const char * modificado[255];
-    const char * novos[255];
-    const char * removidos[255];
+    const char *modificado[255];
+    const char *novos[255];
+    const char *removidos[255];
     int n_novos = 0, n_modificados = 0, n_removidos = 0;
 
     int ifd = 0; // id file direitorio
     int ifc = 0; // id file commit
-    // create matriz de comparação 
+    // create matriz de comparação
     for (; ifd < numFilesDIR; ifd++)
     {
         for (ifc = 0; ifc < c->num_files; ifc++)
@@ -127,63 +126,79 @@ void Status()
     }
     // renderiza comparação
     printf("\n");
-    // biuscar por arquios novos e modificado 
+    // biuscar por arquios novos e modificado
     for (ifd = 0; ifd < numFilesDIR; ifd++)
     {
         int sumRow = 0;
-        int sumCol = 0;
         // printf("%s\t\t\t", filesOfDir[ifd].pathFile);
         for (ifc = 0; ifc < c->num_files; ifc++)
         {
             // printf("%d ", matrixCoparation[ifd][ifc]);
-            sumRow+= matrixCoparation[ifd][ifc];
-            sumCol+= matrixCoparation[ifc][ifd];
+            sumRow += matrixCoparation[ifd][ifc];
         }
-        if(sumRow == 0){
+        if (sumRow == 0)
+        {
             // printf("novo arquivo");
             novos[n_novos] = filesOfDir[ifd].pathFile;
             n_novos++;
-        }else if(sumRow == 1){
+        }
+        else if (sumRow == 1)
+        {
             // printf("arquivo modificado");
             modificado[n_modificados] = filesOfDir[ifd].pathFile;
             n_modificados++;
         }
-        if( sumCol ==0 ){
+        // printf("\n");
+    }
+    for (ifc = 0; ifc < c->num_files; ifc++)
+    {
+        int sumCol = 0;
+        for (ifd = 0; ifd < numFilesDIR; ifd++)
+        {
+            sumCol += matrixCoparation[ifd][ifc];
+        }
+        if (sumCol == 0)
+        {
             removidos[n_removidos] = c->files[ifc].pathFile;
             n_removidos++;
         }
-        // printf("\n");
     }
+    
     free(c);
     free(hashFile);
     // comparar quais arquivos são novos
     // comparar se arquivso foram modificados
     // verificar se arquivso foram deltados
     // rederiza tudo
-    if(n_modificados>0){
+    if (n_modificados > 0)
+    {
 
         printf("Arquivos modificados:\n");
-        for(int i =0; i < n_modificados; i++){
-            printf("\t%s\n",modificado[i]);
+        for (int i = 0; i < n_modificados; i++)
+        {
+            printf("\t%s\n", modificado[i]);
         }
         printf("\n");
     }
-    if(n_novos>0){
+    if (n_novos > 0)
+    {
 
         printf("Novos rquivos:\n");
-        for(int i =0; i < n_novos; i++){
-            printf("\t%s\n",novos[i]);
+        for (int i = 0; i < n_novos; i++)
+        {
+            printf("\t%s\n", novos[i]);
         }
         printf("\n");
     }
-    if(n_removidos>0){
-        
+    if (n_removidos > 0)
+    {
+
         printf("Arquivos removidos:\n");
-        for(int i =0; i < n_removidos; i++){
-            printf("\t%s\n",removidos[i]);
+        for (int i = 0; i < n_removidos; i++)
+        {
+            printf("\t%s\n", removidos[i]);
         }
         printf("\n");
     }
     return;
-
 }
