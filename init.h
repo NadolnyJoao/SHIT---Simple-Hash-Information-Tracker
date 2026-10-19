@@ -1,1 +1,1 @@
-void cmd_init();
+void shit_init();

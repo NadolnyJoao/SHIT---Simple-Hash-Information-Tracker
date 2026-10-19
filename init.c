@@ -13,7 +13,7 @@
 // Caminho do arquivo HEAD, que aponta para o commit atual (ainda nao usado).
 #define FILE_HEAD ".shit/HEAD"
 
-void cmd_init() {
+void shit_init() {
   // stat() verifica se ".shit" ja existe, evitando reinicializar o repositorio.
   struct stat st;
   if (stat(".shit", &st) == 0) {
