@@ -8,7 +8,7 @@
     /* Cria um nome comum SH_PATH_MAX que tem um valor diferente dependendo da plataforma que o programa esta sendo compilado  */
 #elif defined(__linux__)
     #include <limits.h>
-    #define SH_PATH_MAX MAX_PATH
+    #define SH_PATH_MAX PATH_MAX
 #else 
     #define SH_PATH_MAX 4096
     /* fallback para outras plataformas */
@@ -30,7 +30,7 @@ e assim eu consigo a ordem dos commit
 
 */
 typedef struct{
-    char pathFile[255];
+    char pathFile[SH_PATH_MAX]; /* <---- */
     char hashVersion[MAX_LEN_HASH];
 
 }FileSave;
