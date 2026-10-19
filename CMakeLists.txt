@@ -11,7 +11,8 @@ else()
   add_compile_options(-Wall -Wextra)
 endif()
 
-add_executable(shit main.c sha1.c)
+file (GLOB SOURCES "*.c")
+add_executable(shit ${SOURCES})
 target_include_directories(shit PRIVATE .)
 
 # Testes de linha de comando (execute com: ctest --test-dir build --output-on-failure)
