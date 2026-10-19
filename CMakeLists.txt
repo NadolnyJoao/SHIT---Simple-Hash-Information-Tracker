@@ -13,3 +13,10 @@ endif()
 
 add_executable(shit main.c sha1.c)
 target_include_directories(shit PRIVATE .)
+
+# Testes de linha de comando (execute com: ctest --test-dir build --output-on-failure)
+enable_testing()
+add_test(
+  NAME cli
+  COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_cli.sh $<TARGET_FILE:shit>
+)
