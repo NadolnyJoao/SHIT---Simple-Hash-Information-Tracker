@@ -306,7 +306,12 @@ Commit *ReadCommit(const char *hash)
     // printf("leitura do arquivo \n");
 
     char linha[255];
-    Commit *rCommit = malloc(sizeof(Commit));
+    Commit *rCommit = calloc(1, sizeof(Commit));
+    if (rCommit == NULL)
+    {
+        fclose(file);
+        return NULL;
+    }
     int readFiles = 0;
     int nReadfiles = 0; // numero de arquivos lidos
     while (fgets(linha, sizeof(linha), file))
