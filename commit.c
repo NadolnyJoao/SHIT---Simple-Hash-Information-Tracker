@@ -51,6 +51,7 @@ int FileOfIndex(FileSave **files, int *num_files)
             free(*files); // libera o que já alocou
             *files = NULL;
             *num_files = 0;
+            return -1;
         }
         *files = temp;
         (*(files))[*num_files] = nfile;
@@ -97,7 +98,6 @@ int CanCreateCommit()
     if (indexFile == NULL)
     {
         printf("Erro ao abrir index para verificar se pode fazer commit");
-        fclose(indexFile);
         return -1;
     }
     char line[100];
@@ -212,7 +212,6 @@ Commit *CreateCommit(char *flags[], int num_flags)
     if (head == NULL)
     {
         printf("Erro ao abrir head apra registra o commir novo ");
-        fclose(head);
         free(nCommit);
         return NULL;
     }
@@ -228,7 +227,6 @@ Commit *CreateCommit(char *flags[], int num_flags)
     if (indexFile == NULL)
     {
         printf("Erro ao abrir index file para limpar na função create commit");
-        fclose(indexFile);
         free(nCommit);
         return NULL;
     }
@@ -245,7 +243,6 @@ void RegisterCommitFile(const Commit *c)
     if (file == NULL)
     {
         printf("Erro na abertura do arquico commit ");
-        fclose(file);
         return;
     }
     fprintf(file, "COMMIT\n");
@@ -274,16 +271,20 @@ char *GetLastCommit()
     FILE *head = fopen(".shit/HEAD", "r");
     if (head == NULL)
     {
-        printf("Erro ao abrir heda file, linha 268 commit.c");
-        return " ";
+        // Sem HEAD nao ha commit; devolve NULL para o chamador decidir.
+        return NULL;
     }
     char *id_hash = malloc(255);
+    if (id_hash == NULL)
+    {
+        fclose(head);
+        return NULL;
+    }
     if (fgets(id_hash, 255, head) == NULL)
     {
-        printf("Erro ao buscar ultimo commit no head ou não tem ");
         fclose(head);
         free(id_hash);
-        return " ";
+        return NULL;
     }
     fclose(head);
     return id_hash;
@@ -300,7 +301,6 @@ Commit *ReadCommit(const char *hash)
     if (file == NULL)
     {
         printf("Erro na leitura do arquivo do commit, verifique se realmente existe\n");
-        fclose(file);
         return NULL;
     }
     // printf("leitura do arquivo \n");
