@@ -25,17 +25,13 @@ void shit_init() {
   // MAKE_DIR(".shit/index");
   MAKE_DIR(".shit/commits");
 
-  // HEAD e criado vazio; sera preenchido a medida que os commits forem feitos.
+  // HEAD e criado com um valor inicial de "previous" para o primeiro commit.
   FILE *head = fopen(FILE_HEAD, "w");
-  if (head != NULL) {
-    fprintf(head, "break"); // coloquei esse dado porq precisa de um previus
-                            // quando inicia commit
-    if (head == NULL) {
-      fprintf(stderr, "shit: aviso: nao foi possivel criar '%s'.\n", FILE_HEAD);
-    } else {
-      fclose(head);
-    }
-
+  if (head == NULL) {
+    fprintf(stderr, "shit: aviso: nao foi possivel criar '%s'.\n", FILE_HEAD);
+  } else {
+    fprintf(head, "break");
+    fclose(head);
     printf("Repositorio SHIT inicializado em '.shit/'.\n");
   }
 }
