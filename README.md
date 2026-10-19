@@ -40,6 +40,31 @@ Compilação rápida sem CMake (Linux/macOS):
 gcc -std=c11 -Wall -Wextra -I. *.c -o shit
 ```
 
+## Instalação
+
+Para usar o comando `shit` em qualquer diretório, sem informar o caminho do
+binário, use um dos instaladores. Eles compilam o projeto, instalam o binário
+e configuram o `PATH`.
+
+Linux/macOS:
+
+```bash
+./install.sh                  # instala em ~/.local/bin
+./install.sh /usr/local/bin   # ou informe outra pasta
+```
+
+Windows (PowerShell):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+No Windows o binário vai para `%LOCALAPPDATA%\Programs\shit`, que é adicionado
+ao `PATH` do usuário — abra um **novo** terminal depois de instalar.
+
+> No Linux/macOS, se `~/.local/bin` não estiver no `PATH`, o instalador mostra
+> a linha para adicionar no `~/.bashrc` ou `~/.zshrc`.
+
 ## Testes
 
 A suíte de testes de linha de comando fica em [`tests/`](tests/). Ela executa o
