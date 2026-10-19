@@ -4,9 +4,16 @@ O SHIT é um sistema minimalista de controle de versão escrito em C, desenvolvi
 
 ## Comandos
 
+Implementados:
+
 - `init` — Inicializa um repositório.
 - `add <arquivo>` — Adiciona um arquivo à área de preparação.
-- `commit -m "mensagem"` — Registra um snapshot com uma mensagem.
+- `register -m "mensagem"` — Registra um snapshot com uma mensagem.
+- `status` — Compara a pasta de trabalho com o último commit.
+
+Planejados:
+
+- `add .` — Adiciona ao índice todos os arquivos alterados.
 - `log` — Exibe o histórico de commits.
 - `reset <commit-id>` — Restaura os arquivos para um snapshot anterior.
 
