@@ -65,6 +65,7 @@ void Status()
         if (temp == NULL)
         {
             printf("Erro para alocar memoria para a leitura de arquivos do diretorion\n");
+            free(filesOfDir);
             closedir(dr);
             return;
         }
@@ -80,11 +81,18 @@ void Status()
     char *hashFile = GetLastCommit();
     if (hashFile == NULL)
     {
-        printf("Erro ao carregar o hash file: hash null linhas 74 status.c\n");
-        free(hashFile);
+        printf("Nenhum commit encontrado no historico.\n");
+        free(filesOfDir);
         return;
     }
     Commit *c = ReadCommit(hashFile);
+    if (c == NULL)
+    {
+        printf("Nenhum commit encontrado no historico.\n");
+        free(hashFile);
+        free(filesOfDir);
+        return;
+    }
 
     printf("o ultimo commit possui %d arquivos projeto atual possui %d\n", c->num_files, numFilesDIR);
 
@@ -138,13 +146,11 @@ void Status()
     for (ifd = 0; ifd < numFilesDIR; ifd++)
     {
         int sumRow = 0;
-        int sumCol = 0;
         // printf("%s\t\t\t", filesOfDir[ifd].pathFile);
         for (ifc = 0; ifc < c->num_files; ifc++)
         {
             // printf("%d ", matrixCoparation[ifd][ifc]);
-            sumRow+= matrixCoparation[ifd][ifc];
-            sumCol+= matrixCoparation[ifc][ifd];
+            sumRow += matrixCoparation[ifd][ifc];
         }
         if(sumRow == 0){
             // printf("novo arquivo");
@@ -155,14 +161,25 @@ void Status()
             modificado[n_modificados] = filesOfDir[ifd].pathFile;
             n_modificados++;
         }
-        if( sumCol ==0 ){
+        // printf("\n");
+    }
+    // arquivos removidos: existem no commit mas nao na pasta de trabalho
+    for (ifc = 0; ifc < c->num_files; ifc++)
+    {
+        int presente = 0;
+        for (ifd = 0; ifd < numFilesDIR; ifd++)
+        {
+            if (matrixCoparation[ifd][ifc] != 0) { presente = 1; break; }
+        }
+        if (!presente) {
             removidos[n_removidos] = c->files[ifc].pathFile;
             n_removidos++;
         }
-        // printf("\n");
     }
+    free(c->files);
     free(c);
     free(hashFile);
+    free(filesOfDir);
     // comparar quais arquivos são novos
     // comparar se arquivso foram modificados
     // verificar se arquivso foram deltados
