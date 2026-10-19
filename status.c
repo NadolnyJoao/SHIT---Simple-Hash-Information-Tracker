@@ -1,8 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "dirent.h"
+// No Windows usamos o shim de dirent.h (compat/); no Linux/Mac, o do sistema.
+#ifdef _WIN32
+#include "compat/dirent.h"
+#else
+#include <dirent.h>
+#endif
+
 #include "sha1.h"
-
 #include "status.h"
 #include "commit.h"
 #include "file_utils.h"
