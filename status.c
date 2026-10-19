@@ -21,17 +21,18 @@ void Status()
     printf("Seguimos com o diretorio aberto para analise\n");
 
     FileSave *filesOfDir = NULL;
-    int numFiles = 0;
+    int numFilesDIR = 0;
 
     while ((de = readdir(dr)) != NULL)
     {
-        // ignorar algsn arquivos, como o ., .. , 
-        if(de->d_type != DT_REG){
+        // ignorar algsn arquivos, como o ., .. ,
+        if (de->d_type != DT_REG)
+        {
             continue;
         }
 
-        printf("trabalhado com o arquivo %s\n",de->d_name);
-        
+        // printf("trabalhado com o arquivo %s\n",de->d_name);
+
         FileSave nfile;
         strncpy(nfile.pathFile, de->d_name, sizeof(nfile.pathFile) - 1);
         nfile.pathFile[sizeof(nfile.pathFile) - 1] = '\0';
@@ -48,12 +49,12 @@ void Status()
 
         strncpy(nfile.hashVersion, hasFile, sizeof(nfile.hashVersion) - 1);
         nfile.hashVersion[sizeof(nfile.hashVersion) - 1] = '\0';
-        free(hasFile); 
-        
+        free(hasFile);
+
         // printf("hash resgitrado no filesave,parti para adicionar na lista de arquivos\n");
         // adiconar a lista de files
-        
-        FileSave *temp = realloc(filesOfDir, (numFiles + 1) * sizeof(FileSave));
+
+        FileSave *temp = realloc(filesOfDir, (numFilesDIR + 1) * sizeof(FileSave));
         if (temp == NULL)
         {
             printf("Erro para alocar memoria para a leitura de arquivos do diretorion\n");
@@ -63,14 +64,27 @@ void Status()
         // printf("espaço de memoria reservado com sucesso \n");
 
         filesOfDir = temp;
-        filesOfDir[numFiles] = nfile;
-        numFiles ++;
+        filesOfDir[numFilesDIR] = nfile;
+        numFilesDIR++;
         // printf("%s type: %d\n", de->d_name,de->d_type);
     }
     closedir(dr);
-    return;
     // pegar arquivos do ultimo commit
+    char *hashFile = GetLastCommit();
+    if (hashFile == NULL)
+    {
+        printf("Erro ao carregar o hash file: hash null linhas 74 status.c\n");
+        free(hashFile);
+        return;
+    }
+    Commit *c = ReadCommit(hashFile);
 
+    printf("o ultimo commit possui %d arquivos projeto atual possui %d\n", c->num_files, numFilesDIR);
+
+    
+    free(c);
+    free(hashFile);
+    return;
     // comparar quais arquivos são novos
     // comparar se arquivso foram modificados
     // verificar se arquivso foram deltados
