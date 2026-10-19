@@ -37,5 +37,6 @@ typedef struct
 
 Commit *CreateCommit(char* flags[], int num_flags);
 void RegisterCommitFile(const Commit *c);
-
+Commit *ReadCommit(const char *hash);
+char * GetLastCommit();
 #endif
