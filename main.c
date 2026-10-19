@@ -1,9 +1,12 @@
 #include "sha1.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "commit.h"
 #include <string.h>
 #include <sys/stat.h>
+
+#include "commit.h"
+#include "status.h"
+#include "file_utils.h"
 
 // Abstrai a criacao de diretorios: no Windows e _mkdir, no Linux/Mac usa mkdir.
 // Ambos recebem o modo 0777 (permissoes rwx para todos os usuarios).
@@ -20,8 +23,7 @@
 
 void cmd_init();
 void RenderLogs();
-char *read_file(const char *path, long *out_size);
-char *calcula_sha1(const char *path);
+
 void cmd_add(const char *filename);
 
 int main(int argc, char *argv[]) {
@@ -48,6 +50,8 @@ int main(int argc, char *argv[]) {
   }else if (strcmp(argv[1], "commit") == 0)
   {
     CreateCommit(argv,argc);
+  }else if(strcmp(argv[1],"status") == 0){
+    Status();
   } else {
     fprintf(stderr, "shit: erro: comando desconhecido '%s'.\n", argv[1]);
     fprintf(stderr, "uso: shit init | shit add <arquivo> | shit log\n");
@@ -86,54 +90,6 @@ void RenderLogs() {
   printf("mensagem hash \nAuthor: me\nData: 16-10-2026\n\n   Name mensagem ");
 }
 
-// Le o arquivo inteiro para a memoria e devolve um buffer alocado pelo chamador
-// (que deve dar free) e, em *out_size, o numero de bytes lidos.
-// Retorna NULL em caso de erro. O buffer NAO termina com '\0', por isso sempre
-// use o tamanho retornado junto com os dados.
-char *read_file(const char *path, long *out_size) {
-  FILE *file = fopen(path, "rb"); // "rb" le em modo binario, sem traduzir quebras de linha
-  if (file == NULL)
-    return NULL;
-  fseek(file, 0, SEEK_END); // vai para o fim para medir o tamanho
-  long size = ftell(file);
-  rewind(file); // volta ao inicio para ler
-  char *buffer = (char *)malloc(size);
-  if (buffer == NULL) {
-    fclose(file);
-    return NULL;
-  }
-  fread(buffer, 1, size, file);
-  fclose(file);
-  if (out_size != NULL) {
-    *out_size = size;
-  }
-  return buffer;
-}
-// Calcula o SHA-1 do conteudo do arquivo e devolve a representacao em
-// hexadecimal (40 caracteres + '\0'). O chamador deve liberar com free.
-char *calcula_sha1(const char *path) {
-  long size;
-  char *buffer = read_file(path, &size);
-  if (buffer == NULL) {
-    return NULL;
-  }
-  SHA1_CTX contexto;
-  unsigned char digest[20]; // SHA-1 gera 160 bits = 20 bytes
-  SHA1Init(&contexto);
-  SHA1Update(&contexto, (unsigned char *)buffer, size);
-  SHA1Final(digest, &contexto);
-  free(buffer);
-  // 20 bytes em hex = 40 caracteres; +1 para o terminador.
-  char *result_hash = malloc(41);
-  if (result_hash == NULL)
-    return NULL;
-  int i;
-  for (i = 0; i < 20; i++) {
-    sprintf(&result_hash[i * 2], "%02x", digest[i]); // cada byte vira 2 digitos
-  }
-  result_hash[40] = '\0';
-  return result_hash;
-}
 
 // Implementa "add": calcula o hash do arquivo, salva uma copia em
 // .shit/objects/<hash> e registra "caminho hash" no staging (.shit/index).

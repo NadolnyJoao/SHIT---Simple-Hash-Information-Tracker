@@ -12,7 +12,7 @@ int FileOfIndex(FileSave **files, int *num_files)
 
     FILE *fileIndex = fopen(".shit/index", "r");
     // ler cada linha
-    char linha[100];
+    char linha[SH_PATH_MAX + MAX_LEN_HASH + 4]; // 4 é o tab 
     if (fileIndex == NULL)
     {
         printf("Erro ao abrir file index");
@@ -21,6 +21,9 @@ int FileOfIndex(FileSave **files, int *num_files)
     while (fgets(linha, sizeof(linha), fileIndex))
     {
         linha[strcspn(linha, "\r\n")] = 0;
+        // linhas vazias
+        if(linha[0] == '\0') continue;
+
         const char delimitador[] = "\t";
         FileSave nfile;
         // Primeira chamada: passa a string original
@@ -38,8 +41,6 @@ int FileOfIndex(FileSave **files, int *num_files)
         strncpy(nfile.hashVersion, token, sizeof(nfile.hashVersion) - 1);
         nfile.hashVersion[sizeof(nfile.hashVersion) - 1] = '\0';
 
-        // printf("filesave\nname: %s\nhash: %s\n\n", nfile.pathFile,nfile.hashVersion);
-
         // adicionar essa porra na estrutura do commit FileSave* files;
         int nNum_files = *num_files + 1;
         FileSave *temp = realloc(*files, nNum_files * sizeof(FileSave));
@@ -47,10 +48,13 @@ int FileOfIndex(FileSave **files, int *num_files)
         {
             printf("Erro para alocar memoria ");
             fclose(fileIndex);
-            return -1;
+            free(*files); // libera o que já alocou
+            *files = NULL;
+            *num_files = 0;
         }
         *files = temp;
-        *(files)[*num_files] = nfile;
+        (*(files))[*num_files] = nfile;
+        printf("commit.files[file atual]\nname: %s\nhash: %s\n\n", (*files)[*num_files].pathFile, (*files)[*num_files].hashVersion);
         *num_files = nNum_files;
     }
     fclose(fileIndex);
@@ -86,16 +90,19 @@ int GetDate(char date[100])
     return 1;
 }
 
-int CanCreateCommit(){
+int CanCreateCommit()
+{
     // verificar se index esta vaziu
-    FILE *indexFile  = fopen(".shit/index","r");
-    if(indexFile  == NULL){
+    FILE *indexFile = fopen(".shit/index", "r");
+    if (indexFile == NULL)
+    {
         printf("Erro ao abrir index para verificar se pode fazer commit");
         fclose(indexFile);
         return -1;
     }
     char line[100];
-    if(fgets(line,sizeof(line),indexFile) == NULL){
+    if (fgets(line, sizeof(line), indexFile) == NULL)
+    {
         printf("Faça um shit add para ter arquivo ara commitar");
         fclose(indexFile);
         return 0;
@@ -104,13 +111,13 @@ int CanCreateCommit(){
     fclose(indexFile);
 
     return 1;
-
 }
 
 Commit *CreateCommit(char *flags[], int num_flags)
 {
     // verifica se pode faze commit
-    if(CanCreateCommit()<=0){
+    if (CanCreateCommit() <= 0)
+    {
         return NULL;
     }
     Commit *nCommit = calloc(1, sizeof(Commit));
@@ -217,14 +224,15 @@ Commit *CreateCommit(char *flags[], int num_flags)
     // registrar em arquivo  o commit
     RegisterCommitFile(nCommit);
     // limpra index
-    FILE *indexFile = fopen(".shit/index","w");
-    if(indexFile == NULL){
+    FILE *indexFile = fopen(".shit/index", "w");
+    if (indexFile == NULL)
+    {
         printf("Erro ao abrir index file para limpar na função create commit");
         fclose(indexFile);
         free(nCommit);
         return NULL;
     }
-    fclose(indexFile);// espero que limpe
+    fclose(indexFile); // espero que limpe
 
     return nCommit;
 }
@@ -252,11 +260,137 @@ void RegisterCommitFile(const Commit *c)
         FileSave fs;
         fs = c->files[i];
         // snprintf(lineFileSave, sizeof(lineFileSave), "%s %s", fs.pathFile, fs.hashVersion);
-        fprintf(file, fs.pathFile, fs.hashVersion);
+        fprintf(file, "%s %s\n",fs.pathFile, fs.hashVersion);
     }
-    fprintf(file, "END\n");
+    // fprintf(file, "END\n");
 
     fclose(file);
 
     printf("commit salcom sucesso ");
+}
+
+char *GetLastCommit()
+{
+    FILE *head = fopen(".shit/HEAD", "r");
+    if (head == NULL)
+    {
+        printf("Erro ao abrir heda file, linha 268 commit.c");
+        return " ";
+    }
+    char *id_hash = malloc(255);
+    if (fgets(id_hash, 255, head) == NULL)
+    {
+        printf("Erro ao buscar ultimo commit no head ou não tem ");
+        fclose(head);
+        free(id_hash);
+        return " ";
+    }
+    fclose(head);
+    return id_hash;
+}
+
+Commit *ReadCommit(const char *hash)
+{
+    // ler arquivo .shit/commits/hash
+    // printf("-> Lendo commit\n");
+    char path[255];
+    sprintf(path, ".shit/commits/%s", hash);
+    // printf("path file %s\n", path);
+    FILE *file = fopen(path, "rb");
+    if (file == NULL)
+    {
+        printf("Erro na leitura do arquivo do commit, verifique se realmente existe\n");
+        fclose(file);
+        return NULL;
+    }
+    // printf("leitura do arquivo \n");
+
+    char linha[255];
+    Commit *rCommit = malloc(sizeof(Commit));
+    int readFiles = 0;
+    int nReadfiles = 0; // numero de arquivos lidos
+    while (fgets(linha, sizeof(linha), file))
+    {
+        // remover \n da linha
+        linha[strcspn(linha, "\n")] = '\0'; // remove \n
+
+        char *espaco = strchr(linha, ' ');
+        if (espaco == NULL)
+            continue; // linha sem valor
+
+        *espaco = '\0'; // corta: linha = "date"
+        char *campo = linha;
+        char *valor = espaco + 1; // valor = "Sun Oct 18 13:55:46 2026"
+
+        // printf("campo: %s | valor: %s\n", campo, valor);
+        /*
+            id
+            date
+            prev
+            msg
+            num_files
+        */
+        if (readFiles == 0)
+        {
+            switch (campo[0])
+            {
+            case 'i':
+                strncpy(rCommit->id_hash, valor, sizeof(rCommit->id_hash) - 1);
+                rCommit->id_hash[sizeof(rCommit->id_hash) - 1] = '\0';
+                break;
+            case 'd':
+                strncpy(rCommit->date, valor, sizeof(rCommit->date) - 1);
+                rCommit->date[sizeof(rCommit->date) - 1] = '\0';
+                break;
+            case 'p':
+                strncpy(rCommit->previous, valor, sizeof(rCommit->previous) - 1);
+                rCommit->previous[sizeof(rCommit->previous) - 1] = '\0';
+                break;
+            case 'm':
+                strncpy(rCommit->menssage, valor, sizeof(rCommit->menssage) - 1);
+                rCommit->menssage[sizeof(rCommit->menssage) - 1] = '\0';
+                break;
+            case 'n':
+                rCommit->num_files = atoi(valor);
+                rCommit->files = calloc(rCommit->num_files, sizeof(FileSave));
+                readFiles = 1;
+                break;
+            default:
+                break;
+            }
+        }
+        else if (readFiles == 1)
+        {
+            // tratar dos arquivos
+            if (nReadfiles >= rCommit->num_files)
+                continue;
+
+            // printf("cmapo: %s, tratar dos arquivos\n",campo);
+            FileSave fs;
+            strncpy(fs.pathFile, campo, sizeof(fs.pathFile) - 1);
+            fs.pathFile[sizeof(fs.pathFile) - 1] = '\0';
+            strncpy(fs.hashVersion, valor, sizeof(fs.hashVersion) - 1);
+            fs.hashVersion[sizeof(fs.hashVersion) - 1] = '\0';
+
+            // printf("filesave preenchido, path: %s, hash: %s\n",fs.pathFile, fs.hashVersion);
+
+            // printf("numeor de arquivos ja lidos : %d\n",nReadfiles);
+
+            // printf("registre no commit os arquivos lidos\n");
+
+            rCommit->files[nReadfiles] = fs;
+            // rCommit->num_files = nfiles;
+
+            // printf("file: %s, seu hash %s\n", rCommit->files[nReadfiles].pathFile, rCommit->files[nReadfiles].hashVersion);
+            nReadfiles++;
+        }
+    }
+
+    // Primeira chamada: passa a string original
+
+    /*logica para passar dados para variavel*/
+    fclose(file);
+    // printf("commit caregado com sucesso\nid:%s\nultimo commit: %s\nnumero de files:%d\ndata: %s\n        %s\n\n", rCommit->id_hash, rCommit->previous, rCommit->num_files, rCommit->date, rCommit->menssage);
+
+    return rCommit;
 }
