@@ -2,6 +2,17 @@
 #define COMMIT_H
 
 #define MAX_LEN_HASH 41
+#if defined(_WIN32)|| defined(_WIN64)
+    #include <windows.h>
+    #define SH_PATH_MAX MAX_PATH
+    /* Cria um nome comum SH_PATH_MAX que tem um valor diferente dependendo da plataforma que o programa esta sendo compilado  */
+#elif defined(__linux__)
+    #include <limits.h>
+    #define SH_PATH_MAX MAX_PATH
+#else 
+    #define SH_PATH_MAX 4096
+    /* fallback para outras plataformas */
+#endif 
 
 /*
 como o commit funciona

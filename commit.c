@@ -12,7 +12,7 @@ int FileOfIndex(FileSave **files, int *num_files)
 
     FILE *fileIndex = fopen(".shit/index", "r");
     // ler cada linha
-    char linha[100];
+    char linha[SH_PATH_MAX + MAX_LEN_HASH + 4]; // 4 é o tab 
     if (fileIndex == NULL)
     {
         printf("Erro ao abrir file index");
@@ -21,6 +21,9 @@ int FileOfIndex(FileSave **files, int *num_files)
     while (fgets(linha, sizeof(linha), fileIndex))
     {
         linha[strcspn(linha, "\r\n")] = 0;
+        // linhas vazias
+        if(linha[0] == '\0') continue;
+
         const char delimitador[] = "\t";
         FileSave nfile;
         // Primeira chamada: passa a string original
@@ -38,8 +41,6 @@ int FileOfIndex(FileSave **files, int *num_files)
         strncpy(nfile.hashVersion, token, sizeof(nfile.hashVersion) - 1);
         nfile.hashVersion[sizeof(nfile.hashVersion) - 1] = '\0';
 
-        // printf("filesave\nname: %s\nhash: %s\n\n", nfile.pathFile,nfile.hashVersion);
-
         // adicionar essa porra na estrutura do commit FileSave* files;
         int nNum_files = *num_files + 1;
         FileSave *temp = realloc(*files, nNum_files * sizeof(FileSave));
@@ -47,10 +48,13 @@ int FileOfIndex(FileSave **files, int *num_files)
         {
             printf("Erro para alocar memoria ");
             fclose(fileIndex);
-            return -1;
+            free(*files); // libera o que já alocou
+            *files = NULL;
+            *num_files = 0;
         }
         *files = temp;
-        *(files)[*num_files] = nfile;
+        (*(files))[*num_files] = nfile;
+        printf("commit.files[file atual]\nname: %s\nhash: %s\n\n", (*files)[*num_files].pathFile, (*files)[*num_files].hashVersion);
         *num_files = nNum_files;
     }
     fclose(fileIndex);
@@ -256,9 +260,9 @@ void RegisterCommitFile(const Commit *c)
         FileSave fs;
         fs = c->files[i];
         // snprintf(lineFileSave, sizeof(lineFileSave), "%s %s", fs.pathFile, fs.hashVersion);
-        fprintf(file, fs.pathFile, fs.hashVersion);
+        fprintf(file, "%s %s\n",fs.pathFile, fs.hashVersion);
     }
-    fprintf(file, "END\n");
+    // fprintf(file, "END\n");
 
     fclose(file);
 
@@ -304,7 +308,7 @@ Commit *ReadCommit(const char *hash)
     char linha[255];
     Commit *rCommit = malloc(sizeof(Commit));
     int readFiles = 0;
-    int nReadfiles = 0;// numero de arquivos lidos
+    int nReadfiles = 0; // numero de arquivos lidos
     while (fgets(linha, sizeof(linha), file))
     {
         // remover \n da linha
@@ -348,7 +352,7 @@ Commit *ReadCommit(const char *hash)
                 break;
             case 'n':
                 rCommit->num_files = atoi(valor);
-                rCommit->files = calloc(rCommit->num_files,sizeof(FileSave));
+                rCommit->files = calloc(rCommit->num_files, sizeof(FileSave));
                 readFiles = 1;
                 break;
             default:
@@ -358,7 +362,8 @@ Commit *ReadCommit(const char *hash)
         else if (readFiles == 1)
         {
             // tratar dos arquivos
-            if(nReadfiles>= rCommit->num_files) continue;
+            if (nReadfiles >= rCommit->num_files)
+                continue;
 
             // printf("cmapo: %s, tratar dos arquivos\n",campo);
             FileSave fs;
@@ -369,11 +374,10 @@ Commit *ReadCommit(const char *hash)
 
             // printf("filesave preenchido, path: %s, hash: %s\n",fs.pathFile, fs.hashVersion);
 
-            
             // printf("numeor de arquivos ja lidos : %d\n",nReadfiles);
-            
+
             // printf("registre no commit os arquivos lidos\n");
-            
+
             rCommit->files[nReadfiles] = fs;
             // rCommit->num_files = nfiles;
 
