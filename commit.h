@@ -20,7 +20,7 @@ ele é uma estrutura com os dados:
 id: hash
 data da criação
 os arquivos { name : hash }
-como caralhos eu sei quas são so arquivos?
+como será que eu sei quas são so arquivos?
 
 ideia
 
