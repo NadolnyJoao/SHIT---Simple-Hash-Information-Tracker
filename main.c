@@ -39,7 +39,11 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "uso: shit add <arquivo>\n");
       return 1;
     }
-    shit_add(argv[2]);
+    if (strcmp(argv[2], ".") == 0) {
+      shit_add_all();
+    } else {
+      shit_add(argv[2]);
+    }
   } else if (strcmp(argv[1], "register") == 0) {
     CreateCommit(argv, argc);
   } else if (strcmp(argv[1], "status") == 0) {

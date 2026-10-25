@@ -1,5 +1,6 @@
 #include "file_utils.h"
 #include "init.h"
+#include "status.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -62,4 +63,21 @@ void shit_add(const char *path) {
   printf("adicionado: %s (%s)\n", path, hash);
   free(hash);
   free(buffer);
+}
+
+void shit_add_all() {
+  Mudanca *lista = NULL;
+  int qtd = 0;
+
+  if (!Encontra_Mudancas(&lista, &qtd)) {
+    return;
+  }
+
+  for (int i = 0; i < qtd; i++) {
+    if (lista[i].tipo == MUDANCA_NOVO || lista[i].tipo == MUDANCA_MODIFICADO) {
+      shit_add(lista[i].caminho);
+    }
+  }
+
+  free(lista);
 }
