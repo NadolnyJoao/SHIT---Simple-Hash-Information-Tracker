@@ -3,6 +3,7 @@
 #include "init.h"
 #include "status.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 // Abstrai a criacao de diretorios: no Windows e _mkdir, no Linux/Mac usa mkdir.
@@ -56,7 +57,42 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-// Placeholder: ainda imprime dados fixos, sem ler os commits reais.
 void RenderLogs() {
-  printf("mensagem hash \nAuthor: me\nData: 16-10-2026\n\n   Name mensagem ");
+  char *first = GetLastCommit();
+  if (first == NULL) {
+    printf("Nenhum commit encontrado no historico.\n");
+    return;
+  }
+  first[strcspn(first, "\r\n")] = '\0';
+  if (strcmp(first, "break") == 0 || strlen(first) == 0) {
+    printf("Nenhum commit encontrado no historico.\n");
+    free(first);
+    return;
+  }
+
+  char cur_hash[255];
+  strncpy(cur_hash, first, 254);
+  cur_hash[254] = '\0';
+  free(first);
+
+  while (strcmp(cur_hash, "break") != 0 && strlen(cur_hash) > 0) {
+    Commit *c = ReadCommit(cur_hash);
+    if (c == NULL) {
+      break;
+    }
+    printf("commit %s\n", c->id_hash);
+    printf("Date:   %s\n", c->date);
+    printf("        %s\n\n", c->menssage);
+
+    strncpy(cur_hash, c->previous, 254);
+    cur_hash[254] = '\0';
+    cur_hash[strcspn(cur_hash, "\r\n")] = '\0';
+
+    free(c->files);
+    free(c);
+
+    if (strcmp(cur_hash, "break") == 0 || strlen(cur_hash) == 0) {
+      break;
+    }
+  }
 }
