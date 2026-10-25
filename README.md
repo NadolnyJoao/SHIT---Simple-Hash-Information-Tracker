@@ -8,12 +8,12 @@ Implementados:
 
 - `init` — Inicializa um repositório.
 - `add <arquivo>` — Adiciona um arquivo à área de preparação.
+- `add .` — Adiciona ao índice apenas arquivos novos ou modificados em relação ao último commit.
 - `register -m "mensagem"` — Registra um snapshot com uma mensagem.
 - `status` — Compara a pasta de trabalho com o último commit.
 
 Planejados:
 
-- `add .` — Adiciona ao índice todos os arquivos alterados.
 - `log` — Exibe o histórico de commits.
 - `reset <commit-id>` — Restaura os arquivos para um snapshot anterior.
 
