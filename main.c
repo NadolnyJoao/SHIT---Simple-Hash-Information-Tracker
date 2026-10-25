@@ -47,6 +47,13 @@ int main(int argc, char *argv[]) {
     }
   } else if (strcmp(argv[1], "register") == 0) {
     CreateCommit(argv, argc);
+  } else if (strcmp(argv[1], "revert") == 0) {
+    if (argc < 3) {
+      fprintf(stderr, "shit: erro: nenhum commit informado.\n");
+      fprintf(stderr, "uso: shit revert <commit-id>\n");
+      return 1;
+    }
+    RevertCommit(argv[2]);
   } else if (strcmp(argv[1], "status") == 0) {
     Status();
   } else {

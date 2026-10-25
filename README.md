@@ -11,11 +11,8 @@ Implementados:
 - `add .` — Adiciona ao índice apenas arquivos novos ou modificados em relação ao último commit.
 - `register -m "mensagem"` — Registra um snapshot com uma mensagem.
 - `status` — Compara a pasta de trabalho com o último commit.
-
-Planejados:
-
 - `log` — Exibe o histórico de commits.
-- `reset <commit-id>` — Restaura os arquivos para um snapshot anterior.
+- `revert <commit-id>` — Restaura os arquivos e o index para o estado do commit informado.
 
 ## Estrutura
 
