@@ -148,3 +148,43 @@ fi
 
 printf "${GREEN}Todos os testes passaram.${RESET}\n"
 exit 0
+
+
+# ---------------------------------------------------------------------------
+section "6. add . usando Encontra_Mudancas"
+# ---------------------------------------------------------------------------
+rm -rf "$WORK"
+WORK="$(mktemp -d)"
+trap 'rm -rf "$WORK"' EXIT
+cd "$WORK" || exit 2
+
+"$BIN" init >/dev/null 2>&1
+printf 'a\n' > a.txt
+printf 'b\n' > b.txt
+printf 'c\n' > c.txt
+
+"$BIN" add . >/dev/null 2>&1
+
+HASH_A="$(sha1sum a.txt | cut -d" " -f1)"
+HASH_B="$(sha1sum b.txt | cut -d" " -f1)"
+HASH_C="$(sha1sum c.txt | cut -d" " -f1)"
+
+check "add . adiciona a.txt" "1" "$(grep -Fq "$(printf 'a.txt\t%s' "$HASH_A")" .shit/index && echo 1 || echo 0)"
+check "add . adiciona b.txt" "1" "$(grep -Fq "$(printf 'b.txt\t%s' "$HASH_B")" .shit/index && echo 1 || echo 0)"
+check "add . adiciona c.txt" "1" "$(grep -Fq "$(printf 'c.txt\t%s' "$HASH_C")" .shit/index && echo 1 || echo 0)"
+check "add . nao adiciona .shit/" "0" "$(grep -Fq '.shit/' .shit/index && echo 1 || echo 0)"
+
+# commit e testar novos/modificados/removidos
+"$BIN" register -m "init" >/dev/null 2>&1
+printf 'aa\n' > a.txt
+printf 'd\n' > d.txt
+rm b.txt
+
+"$BIN" add . >/dev/null 2>&1
+HASH_A2="$(sha1sum a.txt | cut -d" " -f1)"
+HASH_D="$(sha1sum d.txt | cut -d" " -f1)"
+
+check "add . adiciona apenas modificado (a.txt)" "1" "$(grep -F "$(printf 'a.txt\t%s' "$HASH_A2")" .shit/index | wc -l)"
+check "add . adiciona novo arquivo (d.txt)" "1" "$(grep -Fq "$(printf 'd.txt\t%s' "$HASH_D")" .shit/index && echo 1 || echo 0)"
+check "add . nao readiciona inalterado (c.txt)" "0" "$(grep -F "$(printf 'c.txt\t%s' "$HASH_C")" .shit/index | wc -l)"
+check "add . ignora arquivo removido (b.txt)" "0" "$(grep -Fq 'b.txt' .shit/index && echo 1 || echo 0)"
