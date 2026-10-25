@@ -78,8 +78,26 @@ int Encontra_Mudancas(Mudanca **lista, int *qtd)
     Commit *c = ReadCommit(hashFile);
     if (c == NULL)
     {
-        printf("Nenhum commit encontrado no historico.\n");
         free(hashFile);
+        if (numFilesDIR > 0)
+        {
+            *lista = (Mudanca *)malloc(numFilesDIR * sizeof(Mudanca));
+            if (*lista == NULL)
+            {
+                free(filesOfDir);
+                return 0;
+            }
+            *qtd = numFilesDIR;
+            for (int i = 0; i < numFilesDIR; i++)
+            {
+                strncpy((*lista)[i].caminho, filesOfDir[i].pathFile, 255);
+                (*lista)[i].caminho[255] = '\0';
+                (*lista)[i].tipo = MUDANCA_NOVO;
+            }
+            free(filesOfDir);
+            return 1;
+        }
+        printf("Nenhum commit encontrado no historico.\n");
         free(filesOfDir);
         return 0;
     }
