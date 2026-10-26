@@ -1,28 +1,58 @@
 # SHIT — Simple Hash Information Tracker
 
-O SHIT é um sistema minimalista de controle de versão escrito em C, desenvolvido para fins educacionais. Utiliza snapshots para registrar o histórico de um projeto, sem depender de algoritmos complexos de comparação de arquivos ou ferramentas externas.
+O **SHIT** (Simple Hash Information Tracker) é um sistema minimalista de controle de versão escrito em **C**, desenvolvido com fins **educacionais**. Ele demonstra, na prática, os conceitos fundamentais por trás de sistemas de versionamento como Git, sem depender de algoritmos complexos ou ferramentas externas.
+
+## Objetivo
+
+Criar uma versão simplificada de um VCS, onde arquivos são identificados por seu hash SHA-1, armazenados em um banco de objetos e organizados por snapshots (commits), seguindo uma lógica enxuta e didática.
+
+## Como funciona
+
+O SHIT utiliza o diretório `.shit/` como repositório local:
+
+- `objects/` — Armazena o conteúdo dos arquivos e commits, nomeados pelo seu hash SHA-1 (garantindo deduplicação natural).
+- `index` — Área de preparação (staging). Arquivos listados aqui no formato `caminho<TAB>hash` são os que entrarão no próximo commit.
+- `commits/` — Arquivos com os metadados e lista de arquivos de cada commit.
+- `HEAD` — Aponta para o hash do commit mais recente. No primeiro commit, guarda `"break"`.
+
+Os commits formam uma **cadeia encadeada**: cada um armazena o hash do commit anterior em `previous`, permitindo percorrer o histórico do mais recente ao mais antigo.
 
 ## Comandos
 
-Implementados:
+### Implementados
 
-- `init` — Inicializa um repositório.
-- `add <arquivo>` — Adiciona um arquivo à área de preparação.
-- `add .` — Adiciona ao índice apenas arquivos novos ou modificados em relação ao último commit.
-- `register -m "mensagem"` — Registra um snapshot com uma mensagem.
-- `status` — Compara a pasta de trabalho com o último commit.
-- `log` — Exibe o histórico de commits.
-- `revert <commit-id>` — Restaura os arquivos e o index para o estado do commit informado.
+| Comando | Descrição |
+| --- | --- |
+| `shit init` | Inicializa um repositório criando a estrutura `.shit/` |
+| `shit add <arquivo>` | Adiciona um arquivo individual à área de preparação (index) |
+| `shit add .` | Adiciona ao index **apenas** arquivos novos ou modificados em relação ao último commit. Usa a lógica compartilhada com `status` para identificar mudanças corretamente |
+| `shit register -m "mensagem"` | Cria um snapshot (commit) com a mensagem informada, lendo o que está no index |
+| `shit status` | Compara a pasta de trabalho com o último commit, mostrando arquivos novos, modificados e removidos |
+| `shit log` | Exibe o histórico de commits percorrendo a cadeia a partir do HEAD |
+| `shit revert <commit-id>` | Restaura os arquivos da pasta de trabalho e atualiza o index para o estado exato do commit informado |
 
-## Estrutura
+### Planejados
 
-Os dados do repositório são armazenados no diretório `.shit/`:
+| Comando | Descrição |
+| --- | --- |
+| `shit log` (melhorias) | Aprimorar a visualização do histórico |
+| `shit branch/checkout` | Suporte a múltiplas linhas de desenvolvimento |
 
-- `objects/` — Armazena versões dos arquivos e registros de commits.
-- `index` — Mantém a lista de arquivos preparados.
-- `HEAD` — Aponta para o commit mais recente.
+## Arquitetura
 
-Cada commit registra seu commit pai, sua mensagem e os arquivos incluídos.
+O projeto foi organizado de forma modular em C:
+
+| Arquivo | Responsabilidade |
+| --- | --- |
+| `main.c` | Interpretação dos comandos e fluxo principal |
+| `init.c/h` | Inicialização do repositório |
+| `add.c/h` | Adição de arquivos ao index e ao `add .` |
+| `status.c/h` | Descoberta de mudanças (`Encontra_Mudancas`) e exibição do status |
+| `commit.c/h` | Criação, leitura, log, revert e gerenciamento de commits |
+| `sha1.c/h` | Cálculo do hash SHA-1 dos arquivos |
+| `file_utils.c/h` | Utilitários para leitura de arquivos |
+
+Uma das principais melhorias foi a **refatoração do `status`**: a lógica de varredura, hashing e comparação foi extraída para `Encontra_Mudancas()`, permitindo que `status` e `add .` compartilhem a **mesma fonte da verdade** sobre o que mudou.
 
 ## Compilação
 
@@ -38,63 +68,37 @@ Execute o binário gerado:
 - Linux/macOS: `./build/shit`
 - Windows: `build\shit.exe` (Ninja) ou `build\Debug\shit.exe` (Visual Studio)
 
-Compilação rápida sem CMake (Linux/macOS):
-
-```bash
-gcc -std=c11 -Wall -Wextra -I. *.c -o shit
-```
-
 ## Instalação
 
-Para usar o comando `shit` em qualquer diretório, sem informar o caminho do
-binário, use um dos instaladores. Eles compilam o projeto, instalam o binário
-e configuram o `PATH`.
+Para usar o comando `shit` em qualquer diretório:
 
-Linux/macOS:
-
+**Linux/macOS:**
 ```bash
 ./install.sh                  # instala em ~/.local/bin
 ./install.sh /usr/local/bin   # ou informe outra pasta
 ```
 
-Windows (PowerShell):
-
+**Windows (PowerShell):**
 ```powershell
 powershell -ExecutionPolicy Bypass -File install.ps1
 ```
 
-No Windows o binário vai para `%LOCALAPPDATA%\Programs\shit`, que é adicionado
-ao `PATH` do usuário — abra um **novo** terminal depois de instalar.
-
-> No Linux/macOS, se `~/.local/bin` não estiver no `PATH`, o instalador mostra
-> a linha para adicionar no `~/.bashrc` ou `~/.zshrc`.
-
 ## Testes
 
-A suíte de testes de linha de comando fica em [`tests/`](tests/). Ela executa o
-binário em um diretório temporário e verifica o comportamento observável:
-
-- criação da estrutura pelo `init`;
-- integridade dos objetos e do índice gerados pelo `add` (compara os hashes
-  com o `sha1sum`);
-- casos de borda (nomes com espaços, arquivo vazio, binário e arquivo grande);
-- tratamento de erros e códigos de saída.
-
-Via CTest (recomendado):
+A suíte de testes fica em [`tests/`](tests/) e verifica o comportamento observável do CLI em diretórios temporários.
 
 ```bash
+# Via CTest
 ctest --test-dir build --output-on-failure
-```
 
-Diretamente pelo script:
-
-```bash
+# Diretamente pelo script
 ./tests/test_cli.sh
 ```
 
-Consulte [`tests/README.md`](tests/README.md) para a cobertura completa e para
-informar um binário específico.
+## Conclusão
 
-## Filosofia
+O SHIT cumpre seu propósito **didático** ao reproduzir, de forma simplificada, os mecanismos centrais de um sistema de controle de versão: indexação, armazenamento por hash, snapshots encadeados, comparação de arquivos e navegação pelo histórico.
 
-O SHIT prioriza simplicidade, portabilidade e clareza. Sua arquitetura baseada em snapshots e sua implementação em C oferecem uma introdução prática aos conceitos de controle de versão, sem depender de ferramentas externas de comparação de arquivos.
+Mais do que apenas "funcionar", o projeto foi desenvolvido com foco em **clareza e aprendizado**. A refatoração para reutilizar a lógica entre `status` e `add .`, a implementação da cadeia de commits para `log` e o `revert` para restaurar estados demonstram como conceitos teóricos de VCS se traduzem em código C prático.
+
+**Simplicidade, entendimento e portabilidade** são os pilares do SHIT.
