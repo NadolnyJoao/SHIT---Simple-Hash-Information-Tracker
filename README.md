@@ -13,7 +13,6 @@ Implementados:
 - `status` — Compara a pasta de trabalho com o último commit.
 - `log` — Exibe o histórico de commits.
 - `revert <commit-id>` — Restaura os arquivos e o index para o estado do commit informado.
-- `reset <commit-id>` — Move o HEAD para o commit informado, restaurando arquivos e index.
 
 ## Estrutura
 

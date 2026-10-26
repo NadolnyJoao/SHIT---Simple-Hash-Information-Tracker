@@ -51,5 +51,4 @@ void RegisterCommitFile(const Commit *c);
 Commit *ReadCommit(const char *hash);
 char * GetLastCommit();
 void RevertCommit(const char *hash);
-void ResetCommit(const char *hash);
 #endif
