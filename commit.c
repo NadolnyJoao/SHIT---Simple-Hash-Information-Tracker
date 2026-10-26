@@ -471,3 +471,73 @@ void RevertCommit(const char *hash)
     free(c->files);
     free(c);
 }
+
+void ResetCommit(const char *hash)
+{
+    if (hash == NULL)
+    {
+        printf("shit: erro: nenhum commit informado.\n");
+        printf("uso: shit reset <commit-id>\n");
+        return;
+    }
+    char clean[255];
+    strncpy(clean, hash, 254);
+    clean[254] = '\0';
+    clean[strcspn(clean, "\r\n")] = '\0';
+    if (strlen(clean) == 0 || strcmp(clean, "break") == 0)
+    {
+        printf("shit: erro: commit invalido.\n");
+        return;
+    }
+
+    Commit *c = ReadCommit(clean);
+    if (c == NULL)
+    {
+        printf("shit: erro: nao foi possivel ler o commit '%s'.\n", clean);
+        return;
+    }
+
+    FILE *head = fopen(".shit/HEAD", "w");
+    if (head == NULL)
+    {
+        printf("shit: erro: nao foi possivel atualizar .shit/HEAD\n");
+        free(c->files);
+        free(c);
+        return;
+    }
+    fprintf(head, "%s", c->id_hash);
+    fclose(head);
+
+    FILE *idx = fopen(".shit/index", "w");
+    if (idx == NULL)
+    {
+        printf("shit: erro: nao foi possivel atualizar .shit/index\n");
+        free(c->files);
+        free(c);
+        return;
+    }
+    for (int i = 0; i < c->num_files; i++)
+    {
+        fprintf(idx, "%s\t%s\n", c->files[i].pathFile, c->files[i].hashVersion);
+        FILE *obj = fopen(c->files[i].pathFile, "wb");
+        if (obj == NULL)
+        {
+            continue;
+        }
+        long tamanho = 0;
+        char object_path[256];
+        snprintf(object_path, sizeof(object_path), ".shit/objects/%s", c->files[i].hashVersion);
+        char *buf = read_file(object_path, &tamanho);
+        if (buf != NULL)
+        {
+            fwrite(buf, 1, tamanho, obj);
+            free(buf);
+        }
+        fclose(obj);
+    }
+    fclose(idx);
+
+    printf("HEAD movido para o commit %s\n", c->id_hash);
+    free(c->files);
+    free(c);
+}

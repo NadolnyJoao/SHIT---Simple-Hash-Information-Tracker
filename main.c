@@ -54,6 +54,13 @@ int main(int argc, char *argv[]) {
       return 1;
     }
     RevertCommit(argv[2]);
+  } else if (strcmp(argv[1], "reset") == 0) {
+    if (argc < 3) {
+      fprintf(stderr, "shit: erro: nenhum commit informado.\n");
+      fprintf(stderr, "uso: shit reset <commit-id>\n");
+      return 1;
+    }
+    ResetCommit(argv[2]);
   } else if (strcmp(argv[1], "status") == 0) {
     Status();
   } else {
